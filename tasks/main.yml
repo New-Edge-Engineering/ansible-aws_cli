@@ -1,0 +1,126 @@
+---
+# install software
+- name: ensure awscli is at the latest version
+  pip: name=awscli state=latest
+  tags:
+    - aws_cli
+    - packages
+
+- name: create users .aws credentials
+  template:
+    dest="{{ "%s/%s/.aws/config"|format("/home" if item.user not "root" else "", item.user }}"
+    src=cfg.j2
+    owner=item.user
+    group=item.user
+    mode=0600
+  with_items: aws_cli_credentials
+  tags:
+    - aws_cli
+    - configuration
+# 
+# # sync .ssh folder down
+# - name: create /var/lib/jenkins/.ssh if missing
+  # file:
+    # path=/var/lib/jenkins/.ssh
+    # owner=jenkins
+    # group=nogroup
+    # mode=744
+    # state=directory
+# 
+# - name: retrieve backed upped ssh files
+  # sudo: yes
+  # sudo_user: jenkins
+  # command: "s3cmd --config=/var/lib/jenkins/.s3cfg --force --recursive get s3://jenkins.{{ jenkins_domain }}/.ssh/ /var/lib/jenkins/.ssh"
+  # when: jenkins_aws_access is defined and jenkins_aws_access != None
+  # register: ssh_updated
+  # tags:
+    # - ssh
+    # - jenkins
+# 
+# - name: correct private key permissions
+  # file:
+    # path=/var/lib/jenkins/.ssh/id_rsa
+    # mode=600
+    # state=file
+  # when: ssh_updated|changed
+# 
+# # Create service to watch .ssh files on master only
+# - name: configure s3 watcher template for .ssh folder
+  # template: >
+    # dest=/usr/local/bin/jenkins-ssh-filewatcher.sh
+    # src=s3watcher.j2
+    # mode=0755
+  # when: jenkins_aws_access is defined and jenkins_aws_access != None
+  # with_items:
+    # -
+      # root: '/var/lib/jenkins/'
+      # directory: '.ssh'
+      # bucket: "jenkins.{{ jenkins_domain }}"
+# 
+# - name: configure upstart service template for ssh folder s3 watcher
+  # template:
+    # dest=/etc/init/jenkins-ssh-filewatcher.conf
+    # src=upstart.j2
+    # mode=0644
+  # when: jenkins_aws_access is defined and jenkins_aws_access != None
+  # with_items:
+    # -
+      # name: "jenkins-ssh-filewatcher"
+      # description: "Jenkins ssh files uploader to AWS S3"
+      # executable: "/usr/local/bin/jenkins-ssh-filewatcher.sh"
+# 
+# - name: ensure inotify-tools are installed
+  # apt: pkg=inotify-tools state=latest
+  # when: jenkins_aws_access is defined and jenkins_aws_access != None
+# 
+# - name: start jenkins ssh filewatcher
+  # service:
+    # name=jenkins-ssh-filewatcher
+    # enabled=yes
+    # state=started
+    # sleep=60
+  # when: jenkins_aws_access is defined and jenkins_aws_access != None
+# 
+# # Jobs
+# - name: checking jobs directory existance
+  # shell: ls -R /var/lib/jenkins/jobs | grep config.xml -c | echo 
+  # register: jobs
+  # failed_when: "'FAILED' in jobs.stderr"
+  # tags:
+    # - configuration
+    # - jenkins
+# 
+# - name: retrieve backuped up jobs configurations
+  # sudo: yes
+  # sudo_user: jenkins
+  # command: "s3cmd --config=/var/lib/jenkins/.s3cfg --recursive --force get s3://jenkins.{{ jenkins_domain }}/jobs/ /var/lib/jenkins/jobs"
+  # when: jobs.stdout|int == 0 and jenkins_aws_access is defined and jenkins_aws_access != None
+  # notify:
+  # - restart jenkins
+  # tags:
+    # - configuration
+    # - jenkins
+# 
+# - name: create jenkins job backup schedule
+  # cron:
+    # name="Jenkins job config backup to s3"
+    # minute=0
+    # hour=0
+    # user=jenkins
+    # job="/usr/bin/s3cmd --config=/var/lib/jenkins/.s3cfg --rinclude='^([/a-z-]+)config.xml$' --exclude '*' sync /var/lib/jenkins/jobs/ s3://jenkins.{{ jenkins_domain }}/jobs/ > /var/log/jenkins/jobs.log  2>&1"
+  # when: jenkins_aws_access is defined and jenkins_aws_access != None
+  # tags:
+    # - cron
+    # - jenkins
+# 
+# - name: create jenkins home backup schedule
+  # cron:
+    # name="Jenkins home backup to s3"
+    # minute=0
+    # hour=0
+    # user=jenkins
+    # job="/usr/bin/s3cmd --config=/var/lib/jenkins/.s3cfg --rinclude='^[a-zA-Z._0-9]+.xml$' --exclude '*' sync /var/lib/jenkins/ s3://jenkins.{{ jenkins_domain }}/ > /var/log/jenkins/home.log  2>&1"
+  # when: jenkins_aws_access is defined and jenkins_aws_access != None
+  # tags:
+    # - cron
+    # - jenkins
