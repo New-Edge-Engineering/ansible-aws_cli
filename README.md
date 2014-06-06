@@ -25,9 +25,10 @@ only one, otherwise the first becomes the default. For example:
           key: AKIAI0RPNNAJ0GYAACCC
           secret: pQosD7Y0jagsfdljApXcvHjU7vx89RsHgw6j308888
 
-**aws_cli_archives** a dictionary of name, bucket (name), credentials (optional, uses 
-default), remote directory, local directory. This will sync down files and 
-continuously sync up files.
+**aws_cli_archives** a list of directories to be continuously backupped. It made 
+up of archive of name, credentials (name, optional falling back to default), 
+region, bucket (name), remote (directory), local (directory). This will sync down 
+files and continuously sync up files.
 
 ## License ##
 

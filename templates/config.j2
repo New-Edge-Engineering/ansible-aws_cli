@@ -1,0 +1,21 @@
+{%- if item.user is defined %}
+{%-  for profile_name, profile_values in item.iteritems() %}
+{%-   if profile_name != 'user' %}
+{%-    if loop.first or profile_name == 'default' %}
+[default]
+aws_access_key_id={{ profile_values['key'] }}
+aws_secret_access_key={{ profile_values['secret'] }}
+output=json
+
+{%     else %}
+[profile {{ profile_name }}]
+aws_access_key_id={{ profile_values['key'] }}
+aws_secret_access_key={{ profile_values['secret'] }}
+output=json
+
+{%     endif %}
+{%    endif %}
+{%-  endfor %}
+{%- else %}
+; no user defined with credentials
+{%- endif %}

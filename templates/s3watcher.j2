@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+location={{ item.local }}
+inotifywait -mr --timefmt '%d/%m/%y %H:%M' --format '%T %w %f' -e close_write $location | while read date time dir file; do
+  if [[ "$dir" == *{{ item.local }}* ]]; then
+    suffix=${dir#$location}
+    aws --profile={{ item.credentials|default('default') }} --region={{ item.region|default('us-east-1') }} --color=off s3 sync $dir s3://{{ item.bucket }}/{{ item.remote }}$suffix 
+{%- if item.exclude is defined %}
+{%-  for exclude in item.exclude %}
+ --exclude="{{ exclude }}"
+{%-  endfor %}
+{%- endif %}
+{%- if item.include is defined %}
+{%-  for include in item.include %}
+ --include="{{ include }}"
+{%-  endfor %}
+{%- endif %}
+ >> /var/log/s3uploads.log 2>&1
+  fi
+done

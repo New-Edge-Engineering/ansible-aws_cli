@@ -1,0 +1,8 @@
+# filewatcher-{{ item.name|replace(' ', '-') }}.conf  {{ item.description|default('') }}
+#
+# Generated upstart service
+#
+
+description "{{ item.description|default('A file watcher') }}"
+
+exec /usr/local/bin/filewatcher-{{ item.name|replace(' ', '-') }}.sh
