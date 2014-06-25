@@ -57,6 +57,8 @@
     dest="/usr/local/bin/filewatcher-{{ item.name|replace(' ', '-') }}.sh"
     src=s3watcher.j2
     mode=0755
+    owner=root
+    group=root
   with_items: aws_cli_archives
   tags:
     - aws_cli
@@ -67,6 +69,8 @@
     dest="/etc/init/filewatcher-{{ item.name|replace(' ', '-') }}.conf"
     src=s3upstart.j2
     mode=0644
+    owner=root
+    group=root
   with_items: aws_cli_archives
   tags:
     - aws_cli
