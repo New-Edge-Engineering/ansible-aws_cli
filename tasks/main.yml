@@ -1,4 +1,8 @@
 ---
+- name: AWS CLI | Install supporting packages
+  apt:
+    name: python-pip
+
 # install software
 - name: ensure awscli is at the latest version
   pip: name=awscli state=latest
@@ -44,7 +48,7 @@
   tags:
     - aws_cli
     - files
- 
+
 # Create services to watch folders
 - name: ensure inotify-tools are installed
   apt: pkg=inotify-tools state=latest
