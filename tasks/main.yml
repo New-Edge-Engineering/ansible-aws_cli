@@ -12,8 +12,8 @@
 
 # create aws configuration files
 - name: create users .aws directory
-  sudo: yes
-  sudo_user: "{{ item.user }}"
+  become: yes
+  become_user: "{{ item.user }}"
   file:
     group="{{ item.user }}"
     mode=0755
@@ -26,8 +26,8 @@
     - configuration
 
 - name: create users .aws credentials
-  sudo: yes
-  sudo_user: "{{ item.user }}"
+  become: yes
+  become_user: "{{ item.user }}"
   template:
     dest="~/.aws/config"
     src=config.j2
