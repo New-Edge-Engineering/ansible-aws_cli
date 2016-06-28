@@ -5,7 +5,9 @@
 
 # install software
 - name: ensure awscli is at the latest version
-  pip: name=awscli state=latest
+  pip:
+    name: awscli
+    state: latest
   tags:
     - aws_cli
     - packages
@@ -15,11 +17,11 @@
   become: yes
   become_user: "{{ item.user }}"
   file:
-    group="{{ item.user }}"
-    mode=0755
-    owner="{{ item.user }}"
-    path="~/.aws"
-    state=directory
+    group: "{{ item.user }}"
+    mode: 0755
+    owner: "{{ item.user }}"
+    path: "~/.aws"
+    state: directory
   with_items: aws_cli_credentials
   tags:
     - aws_cli
@@ -29,11 +31,25 @@
   become: yes
   become_user: "{{ item.user }}"
   template:
-    dest="~/.aws/config"
-    src=config.j2
-    owner="{{ item.user }}"
-    group="{{ item.user }}"
-    mode=0650
+    dest: "~/.aws/credentials"
+    src: credentials.j2
+    owner: "{{ item.user }}"
+    group: "{{ item.user }}"
+    mode: 0650
+  with_items: aws_cli_credentials
+  tags:
+    - aws_cli
+    - configuration
+
+- name: create .aws configuration
+  become: yes
+  become_user: "{{ item.user }}"
+  copy:
+    dest: "~/.aws/config"
+    src: config
+    owner: "{{ item.user }}"
+    group: "{{ item.user }}"
+    mode: 0650
   with_items: aws_cli_credentials
   tags:
     - aws_cli
@@ -51,18 +67,20 @@
 
 # Create services to watch folders
 - name: ensure inotify-tools are installed
-  apt: pkg=inotify-tools state=latest
+  apt:
+    pkg: inotify-tools
+    state: latest
   tags:
     - aws_cli
     - packages
 
 - name: configure s3 watcher executable for folders
-  template: >
-    dest="/usr/local/bin/filewatcher-{{ item.name|replace(' ', '-') }}.sh"
-    src=s3watcher.j2
-    mode=0755
-    owner=root
-    group=root
+  template:
+    dest: "/usr/local/bin/filewatcher-{{ item.name|replace(' ', '-') }}.sh"
+    src: s3watcher.j2
+    mode: 0755
+    owner: root
+    group: root
   with_items: aws_cli_archives
   tags:
     - aws_cli
@@ -70,11 +88,11 @@
 
 - name: configure upstart service template for folder s3 watchers
   template:
-    dest="/etc/init/filewatcher-{{ item.name|replace(' ', '-') }}.conf"
-    src=s3upstart.j2
-    mode=0644
-    owner=root
-    group=root
+    dest: "/etc/init/filewatcher-{{ item.name|replace(' ', '-') }}.conf"
+    src: s3upstart.j2
+    mode: 0644
+    owner: root
+    group: root
   with_items: aws_cli_archives
   tags:
     - aws_cli
@@ -82,10 +100,10 @@
 
 - name: stop filewatcher services
   service:
-    name="filewatcher-{{ item.name|replace(' ', '-') }}"
-    enabled=yes
-    state=stopped
-    sleep=60
+    name: "filewatcher-{{ item.name|replace(' ', '-') }}"
+    enabled: yes
+    state: stopped
+    sleep: 60
   with_items: aws_cli_archives
   tags:
     - aws_cli
@@ -93,10 +111,10 @@
 
 - name: start filewatcher services
   service:
-    name="filewatcher-{{ item.name|replace(' ', '-') }}"
-    enabled=yes
-    state=started
-    sleep=60
+    name: "filewatcher-{{ item.name|replace(' ', '-') }}"
+    enabled: yes
+    state: stopped
+    sleep: 60
   with_items: aws_cli_archives
   tags:
     - aws_cli
