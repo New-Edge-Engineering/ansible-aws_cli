@@ -57,8 +57,8 @@
 
 # recover files from s3 archives using sync
 - name: recover files within archives
-  sudo: yes
-  sudo_user: "{{ item.user }}"
+  become: yes
+  become_user: "{{ item.user }}"
   command: "aws --profile={{ item.credentials|default('default') }} --region={{ item.region|default('us-east-1') }} --color=off s3 cp s3://{{ item.bucket }}/{{ item.remote }}/ {{ item.local }} --recursive"
   with_items: aws_cli_archives
   tags:
