@@ -22,7 +22,7 @@
     owner: "{{ item.user }}"
     path: "~/.aws"
     state: directory
-  with_items: aws_cli_credentials
+  with_items: "{{aws_cli_credentials}}"
   tags:
     - aws_cli
     - configuration
@@ -36,7 +36,7 @@
     owner: "{{ item.user }}"
     group: "{{ item.user }}"
     mode: 0650
-  with_items: aws_cli_credentials
+  with_items: "{{aws_cli_credentials}}"
   tags:
     - aws_cli
     - configuration
@@ -50,7 +50,7 @@
     owner: "{{ item.user }}"
     group: "{{ item.user }}"
     mode: 0650
-  with_items: aws_cli_credentials
+  with_items: "{{aws_cli_credentials}}"
   tags:
     - aws_cli
     - configuration
@@ -60,7 +60,7 @@
   become: yes
   become_user: "{{ item.user }}"
   command: "aws --profile={{ item.credentials|default('default') }} --region={{ item.region|default('us-east-1') }} --color=off s3 cp s3://{{ item.bucket }}/{{ item.remote }}/ {{ item.local }} --recursive"
-  with_items: aws_cli_archives
+  with_items: "{{aws_cli_archives}}"
   tags:
     - aws_cli
     - files
@@ -81,7 +81,7 @@
     mode: 0755
     owner: root
     group: root
-  with_items: aws_cli_archives
+  with_items: "{{aws_cli_archives}}"
   tags:
     - aws_cli
     - files
@@ -93,7 +93,7 @@
     mode: 0644
     owner: root
     group: root
-  with_items: aws_cli_archives
+  with_items: "{{aws_cli_archives}}"
   tags:
     - aws_cli
     - service
@@ -104,7 +104,7 @@
     enabled: yes
     state: stopped
     sleep: 60
-  with_items: aws_cli_archives
+  with_items: "{{aws_cli_archives}}"
   tags:
     - aws_cli
     - service
@@ -115,7 +115,7 @@
     enabled: yes
     state: stopped
     sleep: 60
-  with_items: aws_cli_archives
+  with_items: "{{aws_cli_archives}}"
   tags:
     - aws_cli
     - service
